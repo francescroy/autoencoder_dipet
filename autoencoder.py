@@ -147,7 +147,7 @@ threshold = np.mean(train_loss) + np.std(train_loss)
 #reconstructions = autoencoder.predict(new_trace)
 #test_loss = tf.keras.losses.mae(reconstructions, new_trace)
 #if test_loss < threshold:
-#   ANOMALY!
+#   ANOMALY! TALK TO PROMETHEUS!
 
 
 #from kafka import KafkaConsumer
