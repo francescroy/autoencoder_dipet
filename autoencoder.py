@@ -18,21 +18,25 @@ from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model
 
 
+
+
 # NEURAL NETWORK DEFINITION
+
+number_input_features = 45
 
 class AnomalyDetector(Model):
     def __init__(self):
         super(AnomalyDetector, self).__init__()
 
         self.encoder = tf.keras.Sequential([
-            layers.Dense(32, activation="relu", input_shape=(45,)),
+            layers.Dense(32, activation="relu", input_shape=(number_input_features,)),
             layers.Dense(16, activation="relu"),
             layers.Dense(8, activation="relu")])
 
         self.decoder = tf.keras.Sequential([
             layers.Dense(16, activation="relu", input_shape=(8,)),
             layers.Dense(32, activation="relu"),
-            layers.Dense(45, activation="sigmoid")])  # NUMBER OF INPUT FEATURES
+            layers.Dense(number_input_features, activation="sigmoid")])  # NUMBER OF INPUT FEATURES
 
     def call(self, x):
         encoded = self.encoder(x)
@@ -143,7 +147,7 @@ threshold = np.mean(train_loss) + np.std(train_loss)
 
 # todo
 
-#Each time a new record is consumed from kafka we predict (but before preprocess the trace!!!)
+#Each time a new record is consumed from kafka we predict (but before preprocess the trace, standarize it, etc...!!!)
 #reconstructions = autoencoder.predict(new_trace)
 #test_loss = tf.keras.losses.mae(reconstructions, new_trace)
 #if test_loss < threshold:
