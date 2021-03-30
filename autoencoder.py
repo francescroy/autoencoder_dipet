@@ -7,17 +7,17 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 import numpy as np
 import os
 import pandas as pd
-import time
 from tensorflow.keras.optimizers import Adam
 from tensorflow import keras
 import tensorflow as tf
 import math
+import time
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model
 from kafka import KafkaConsumer
-
+from preprocessing import *
 
 
 # NEURAL NETWORK DEFINITION
@@ -48,31 +48,75 @@ def convert_to_trace(message_value):
     return message_value
 
 
+def preprocessing(df):
+    df.insert(4, "TCP", 0)
+    df.insert(5, "UDP", 0)
+    df.insert(6, "ICMP", 0)
+    df.insert(7, "GRE", 0)
+    df.insert(8, "OTHER", 0)
+
+    df["TCP"] = df["ip_proto"].apply(setTCP)
+    df["UDP"] = df["ip_proto"].apply(setUDP)
+    df["ICMP"] = df["ip_proto"].apply(setICMP)
+    df["GRE"] = df["ip_proto"].apply(setGRE)
+    df["OTHER"] = df["ip_proto"].apply(setOTHER)
+
+    del df['ip_proto']
+
+    df["port_src"] = df["port_src"].apply(setWellKnownPort)
+    df["port_dst"] = df["port_dst"].apply(setWellKnownPort)
+
+    df.insert(16, "avarage_packet_size", 0)
+    df["avarage_packet_size"] = df["bytes"] / df["packets"]
+
+    df.insert(3, "NS", 0)
+    df.insert(4, "CWR", 0)
+    df.insert(5, "ECE", 0)
+    df.insert(6, "URG", 0)
+    df.insert(7, "ACK", 0)
+    df.insert(8, "PSH", 0)
+    df.insert(9, "RST", 0)
+    df.insert(10, "SYN", 0)
+    df.insert(11, "FIN", 0)
+
+    df["NS"] = df["tcp_flags"].apply(setNS)
+    df["CWR"] = df["tcp_flags"].apply(setCWR)
+    df["ECE"] = df["tcp_flags"].apply(setECE)
+    df["URG"] = df["tcp_flags"].apply(setURG)
+    df["ACK"] = df["tcp_flags"].apply(setACK)
+    df["PSH"] = df["tcp_flags"].apply(setPSH)
+    df["RST"] = df["tcp_flags"].apply(setRST)
+    df["SYN"] = df["tcp_flags"].apply(setSYN)
+    df["FIN"] = df["tcp_flags"].apply(setFIN)
+
+    del df['tcp_flags']
+
+    return df
+
+
+
 
 if __name__ == "__main__":
 
     # READING THE DATASET
 
-    df1 = pd.read_csv("/home/francesc/Escritorio/dataset_kaggle/MachineLearningCSV/MachineLearningCVE/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv")
-
-    # PREPROCESSING
-
-    # todo
-
-
+    df = pd.read_csv(os.path.dirname(os.path.realpath(__file__))+"/nftraces.csv")
+    df = preprocessing(df)
 
 
 
     # SPLITING BETWEEN TRAIN AND TEST SET
     raw_data = [] # anomal and normal records, with a 1 o 0 label (last column)
+
     labels = raw_data[:, -1]
     data = raw_data[:, 0:-1]
+
     train_data, test_data, train_labels, test_labels = train_test_split(data, labels, test_size=0.2, random_state=21)
 
 
 
 
-    # STANDARIZE THE DATA
+    # STANDARIZE THE DATA (maybe not standarize all attributes?)
     scaler = StandardScaler()
     train_data = scaler.fit_transform(train_data)
     test_data = scaler.transform(test_data)
@@ -82,8 +126,10 @@ if __name__ == "__main__":
     # SPLIT INTO NORMAL AND ANOMAL DATA (FOR TRAIN SET AND FOR TEST SET)
     train_labels = train_labels.astype(bool)
     test_labels = test_labels.astype(bool)
+
     normal_train_data = train_data[train_labels]
     normal_test_data = test_data[test_labels]
+
     anomalous_train_data = train_data[~train_labels]
     anomalous_test_data = test_data[~test_labels]
 
@@ -133,3 +179,6 @@ if __name__ == "__main__":
 
 
 
+
+
+## PROVAR CON DIFERENTES AUTOENCODERS....!!!! CON MAS O CON MENOS PARAMETROS...
