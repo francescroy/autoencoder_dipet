@@ -91,10 +91,7 @@ def preprocessing(df):
 
     del df['tcp_flags']
 
-    ##zero mean and unit variance
-    #df["bytes"] = (df["bytes"] - df["bytes"].mean()) / df["bytes"].std()
-    #df["packets"] = (df["packets"] - df["packets"].mean()) / df["packets"].std()
-    #df["avarage_packet_size"] = (df["avarage_packet_size"] - df["avarage_packet_size"].mean()) / df["avarage_packet_size"].std()
+
 
     return df
 
@@ -121,10 +118,17 @@ if __name__ == "__main__":
 
 
 
-    # STANDARIZE THE DATA (maybe not all attributes? only the numeric ones...)
+    # STANDARIZE THE DATA
     scaler = StandardScaler()
     train_data = scaler.fit_transform(train_data)
     test_data = scaler.transform(test_data)
+    ##zero mean and unit variance
+    # df["bytes"] = (df["bytes"] - df["bytes"].mean()) / df["bytes"].std()
+    # df["packets"] = (df["packets"] - df["packets"].mean()) / df["packets"].std()
+    # df["avarage_packet_size"] = (df["avarage_packet_size"] - df["avarage_packet_size"].mean()) / df["avarage_packet_size"].std()
+
+
+
 
 
 
