@@ -108,12 +108,9 @@ if __name__ == "__main__":
 
 
     # SPLITING BETWEEN TRAIN AND TEST SET
-    raw_data = [] # anomal and normal records, with a 1 o 0 label (last column)
+    data = [] # normal records
 
-    labels = raw_data[:, -1]
-    data = raw_data[:, 0:-1]
-
-    train_data, test_data, train_labels, test_labels = train_test_split(data, labels, test_size=0.2, random_state=21)
+    train_data, test_data = train_test_split(data, test_size=0.2, random_state=21)
 
 
 
@@ -130,35 +127,21 @@ if __name__ == "__main__":
 
 
 
-
-
-    # SPLIT INTO NORMAL AND ANOMAL DATA (FOR TRAIN SET AND FOR TEST SET)
-    train_labels = train_labels.astype(bool)
-    test_labels = test_labels.astype(bool)
-
-    normal_train_data = train_data[train_labels]
-    normal_test_data = test_data[test_labels]
-
-    anomalous_train_data = train_data[~train_labels]
-    anomalous_test_data = test_data[~test_labels]
-
-
-
     # INITIALIZING AUTOENCODER
     autoencoder = AnomalyDetector()
     optimizer = Adam(learning_rate=0.001)
     autoencoder.compile(optimizer=optimizer, loss='mae') #or mse?
 
     # TRAINING
-    history = autoencoder.fit(normal_train_data, normal_train_data,
+    history = autoencoder.fit(train_data, train_data,
           epochs=20,
           batch_size=512,
           validation_data=(test_data, test_data),
           shuffle=True)
 
 
-    reconstructions = autoencoder.predict(normal_train_data)
-    train_loss = tf.keras.losses.mae(reconstructions, normal_train_data) #or mse if we want to try...
+    reconstructions = autoencoder.predict(train_data)
+    train_loss = tf.keras.losses.mae(reconstructions, train_data) #or mse if we want to try...
     threshold = np.mean(train_loss) + np.std(train_loss)
 
 
@@ -180,6 +163,9 @@ if __name__ == "__main__":
     for msg in consumer:
 
         new_trace = convert_to_trace(msg.value)
+
+        new_trace = preprocessing(new_trace)
+        new_trace = scaler.transform(new_trace)
 
         reconstructions = autoencoder.predict(new_trace)
         test_loss = tf.keras.losses.mae(reconstructions, new_trace)
