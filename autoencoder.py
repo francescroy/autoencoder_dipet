@@ -101,16 +101,12 @@ def preprocessing(df):
 if __name__ == "__main__":
 
     # READING THE DATASET
-
     df = pd.read_csv(os.path.dirname(os.path.realpath(__file__))+"/nftraces.csv")
     df = preprocessing(df)
 
 
-
     # SPLITING BETWEEN TRAIN AND TEST SET
     train_data, test_data = train_test_split(df, test_size=0.2, random_state=21)
-
-
 
 
     # STANDARIZE THE DATA
@@ -121,8 +117,6 @@ if __name__ == "__main__":
     # df["bytes"] = (df["bytes"] - df["bytes"].mean()) / df["bytes"].std()
     # df["packets"] = (df["packets"] - df["packets"].mean()) / df["packets"].std()
     # df["avarage_packet_size"] = (df["avarage_packet_size"] - df["avarage_packet_size"].mean()) / df["avarage_packet_size"].std()
-
-
 
 
     # INITIALIZING AUTOENCODER
@@ -148,9 +142,7 @@ if __name__ == "__main__":
 
 
 
-    # INFERENCE
-
-    #Each time a new record is consumed from kafka we predict (but before preprocess the trace, standarize it, etc...!!!)
+    # INFERENCE: Each time a new record is consumed from kafka we predict:
 
     bootstrap_servers = ['localhost:9092']
     topic_name='network_traces'
