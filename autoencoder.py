@@ -143,7 +143,6 @@ if __name__ == "__main__":
 
 
     # INFERENCE: Each time a new record is consumed from kafka we predict:
-
     bootstrap_servers = ['45.150.187.3:9092']
     topic_name='network_traces'
 
