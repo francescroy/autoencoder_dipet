@@ -108,9 +108,7 @@ if __name__ == "__main__":
 
 
     # SPLITING BETWEEN TRAIN AND TEST SET
-    data = [] # normal records
-
-    train_data, test_data = train_test_split(data, test_size=0.2, random_state=21)
+    train_data, test_data = train_test_split(df, test_size=0.2, random_state=21)
 
 
 
